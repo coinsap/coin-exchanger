@@ -1,6 +1,6 @@
-package com.coin.exchanger.order;
+package com.coin.exchanger.market.order;
 
-import com.coin.exchanger.order.book.OrderBook;
+import com.coin.exchanger.market.order.book.OrderBook;
 
 import javax.persistence.*;
 import java.util.List;

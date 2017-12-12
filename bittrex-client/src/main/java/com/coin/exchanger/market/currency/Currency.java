@@ -1,4 +1,4 @@
-package com.coin.exchanger.currency;
+package com.coin.exchanger.market.currency;
 
 import com.coin.exchanger.market.Market;
 

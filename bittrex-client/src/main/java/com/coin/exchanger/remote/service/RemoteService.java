@@ -1,6 +1,6 @@
 package com.coin.exchanger.remote.service;
 
-import com.coin.exchanger.order.OrderType;
+import com.coin.exchanger.market.order.OrderType;
 import com.coin.exchanger.remote.response.*;
 import com.coin.exchanger.remote.response.base.ResponseListWrapper;
 import com.coin.exchanger.remote.response.base.ResponseWrapper;
@@ -10,7 +10,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class RemoteService {
@@ -26,57 +29,51 @@ public class RemoteService {
     }
 
     public ResponseListWrapper<Market> getMarketsRestCall() {
-        return this.restTemplate.<ResponseListWrapper<Market>>getForObject(URI + "getmarkets", (Class<ResponseListWrapper<Market>>) (Class<?>) ResponseListWrapper.class);
+        return this.restTemplate.getForObject(URI + "getmarkets", (Class<ResponseListWrapper<Market>>) (Class<?>) ResponseListWrapper.class);
     }
 
     public ResponseListWrapper<Currency> getCurrenciesRestCall(){
-        return this.restTemplate.<ResponseListWrapper<Currency>>getForObject(URI+"getcurrencies",(Class<ResponseListWrapper<Currency>>) (Class<?>)ResponseListWrapper.class);
+        return this.restTemplate.getForObject(URI + "getcurrencies", (Class<ResponseListWrapper<Currency>>) (Class<?>) ResponseListWrapper.class);
     }
 
     public ResponseWrapper<Ticker> getTickerRestCall(String market) {
         UriComponentsBuilder builder = UriComponentsBuilder
                 .fromUriString(URI+"getticker")
                 .queryParam("market", market);
-        return this.restTemplate.<ResponseWrapper<Ticker>>getForObject(builder.toUriString(), (Class<ResponseWrapper<Ticker>>) (Class<?>) ResponseWrapper.class);
+        return this.restTemplate.getForObject(builder.toUriString(), (Class<ResponseWrapper<Ticker>>) (Class<?>) ResponseWrapper.class);
     }
 
     public ResponseListWrapper<MarketSummary> getMarketSummariesRestCall(){
-        return this.restTemplate.<ResponseListWrapper<MarketSummary>>getForObject(URI+"getmarketsummaries",(Class<ResponseListWrapper<MarketSummary>>) (Class<?>)ResponseListWrapper.class);
+        return this.restTemplate.getForObject(URI + "getmarketsummaries", (Class<ResponseListWrapper<MarketSummary>>) (Class<?>) ResponseListWrapper.class);
     }
     
     public ResponseWrapper<MarketSummary> getMarketSummaryRestCall(String market){
         UriComponentsBuilder builder = UriComponentsBuilder
                 .fromUriString(URI+"getmarketsummary")
                 .queryParam("market", market);
-        return  this.restTemplate.<ResponseWrapper<MarketSummary>>getForObject(builder.toUriString(),(Class<ResponseWrapper<MarketSummary>>) (Class<?>)ResponseWrapper.class);
+        return this.restTemplate.getForObject(builder.toUriString(), (Class<ResponseWrapper<MarketSummary>>) (Class<?>) ResponseWrapper.class);
 
     }
 
-    public ResponseWrapper<OrderBook> getOrderBookRestCall(String market, OrderType orderType){
+    public ResponseWrapper<OrderBook> getOrderBookRestCall(String market) {
         UriComponentsBuilder builder = UriComponentsBuilder
                 .fromUriString(URI+"getorderbook")
                 .queryParam("market", market)
-                .queryParam("type", orderType.getKey());
+                .queryParam("type", OrderType.BOTH.name().toLowerCase());
 
-        if(OrderType.BOTH == orderType)
-            return this.restTemplate.<ResponseWrapper<OrderBook>>getForObject(builder.toUriString(),(Class<ResponseWrapper<OrderBook>>)(Class<?>)ResponseWrapper.class);
-        else
-            return getOrderListWrapper(this.restTemplate.getForObject(builder.toUriString(),(Class<ResponseWrapper<List<Order>>>)(Class<?>)ResponseWrapper.class), orderType);
-
+        ResponseWrapper<LinkedHashMap> orders = this.restTemplate.getForObject(builder.toUriString(), (Class<ResponseWrapper<LinkedHashMap>>) (Class<?>) ResponseWrapper.class);
+        return getOrderListWrapper(orders);
     }
 
-    private ResponseWrapper<OrderBook> getOrderListWrapper(ResponseWrapper<List<Order>> listResponseWrapper, OrderType orderType){
+    private ResponseWrapper<OrderBook> getOrderListWrapper(ResponseWrapper<LinkedHashMap> orders) {
+        List<LinkedHashMap<String, Double>> buy = (List<LinkedHashMap<String, Double>>) orders.getResult().get(OrderType.BUY.name().toLowerCase());
+        List<LinkedHashMap<String, Double>> sell = (List<LinkedHashMap<String, Double>>) orders.getResult().get(OrderType.SELL.name().toLowerCase());
         ResponseWrapper<OrderBook> responseWrapper = new ResponseWrapper<>();
         OrderBook orderBook = new OrderBook();
-
-        if(OrderType.BUY == orderType)
-            orderBook.setBuy(listResponseWrapper.getResult());
-
-        if (OrderType.SELL == orderType)
-            orderBook.setSell(listResponseWrapper.getResult());
-
-        responseWrapper.setMessage(listResponseWrapper.getMessage());
-        responseWrapper.setSuccess(listResponseWrapper.getSuccess());
+        orderBook.setBuy(buy.stream().map(a -> new Order(a.get("Quantity"), a.get("Rate"))).collect(Collectors.toCollection(ArrayList::new)));
+        orderBook.setSell(sell.stream().map(a -> new Order(a.get("Quantity"), a.get("Rate"))).collect(Collectors.toCollection(ArrayList::new)));
+        responseWrapper.setMessage(orders.getMessage());
+        responseWrapper.setSuccess(orders.getSuccess());
         responseWrapper.setResult(orderBook);
         return responseWrapper;
     }

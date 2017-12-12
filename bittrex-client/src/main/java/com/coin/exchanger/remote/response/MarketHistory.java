@@ -2,7 +2,7 @@ package com.coin.exchanger.remote.response;
 
 
 import com.coin.exchanger.market.history.FillType;
-import com.coin.exchanger.order.OrderType;
+import com.coin.exchanger.market.order.OrderType;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.Date;

@@ -1,21 +1,21 @@
 package com.coin.exchanger.bittrexclient;
 
-import com.coin.exchanger.currency.Currency;
-import com.coin.exchanger.currency.CurrencyRepository;
 import com.coin.exchanger.market.Market;
 import com.coin.exchanger.market.MarketRepository;
+import com.coin.exchanger.market.currency.Currency;
+import com.coin.exchanger.market.currency.CurrencyRepository;
 import com.coin.exchanger.market.history.FillType;
 import com.coin.exchanger.market.history.MarketHistory;
 import com.coin.exchanger.market.history.MarketHistoryRepository;
+import com.coin.exchanger.market.order.Order;
+import com.coin.exchanger.market.order.OrderRepository;
+import com.coin.exchanger.market.order.OrderType;
+import com.coin.exchanger.market.order.book.OrderBook;
+import com.coin.exchanger.market.order.book.OrderBookRepository;
 import com.coin.exchanger.market.summary.MarketSummary;
 import com.coin.exchanger.market.summary.MarketSummaryRepository;
 import com.coin.exchanger.market.summary.ticker.Ticker;
 import com.coin.exchanger.market.summary.ticker.TickerRepository;
-import com.coin.exchanger.order.Order;
-import com.coin.exchanger.order.OrderRepository;
-import com.coin.exchanger.order.OrderType;
-import com.coin.exchanger.order.book.OrderBook;
-import com.coin.exchanger.order.book.OrderBookRepository;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,7 +30,7 @@ import java.util.Date;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class RepositoriesTest {
+public class RepositoryTest {
 
     @Autowired
     private CurrencyRepository currencyRepository;

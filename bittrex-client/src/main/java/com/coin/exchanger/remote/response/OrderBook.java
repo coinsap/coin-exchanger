@@ -1,10 +1,7 @@
 package com.coin.exchanger.remote.response;
 
-import com.coin.exchanger.order.OrderType;
-import com.coin.exchanger.remote.response.Order;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import java.util.HashMap;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)

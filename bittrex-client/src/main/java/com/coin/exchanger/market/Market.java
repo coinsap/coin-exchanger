@@ -1,6 +1,6 @@
 package com.coin.exchanger.market;
 
-import com.coin.exchanger.currency.Currency;
+import com.coin.exchanger.market.currency.Currency;
 import com.coin.exchanger.market.history.MarketHistory;
 import com.coin.exchanger.market.summary.MarketSummary;
 

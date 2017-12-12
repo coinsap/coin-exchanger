@@ -1,10 +1,14 @@
 package com.coin.exchanger.remote.response;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class Order {
+
+    public Order(Double quantity, Double rate) {
+        this.quantity = quantity;
+        this.rate = rate;
+    }
+
     private Double quantity;
     private Double rate;
 

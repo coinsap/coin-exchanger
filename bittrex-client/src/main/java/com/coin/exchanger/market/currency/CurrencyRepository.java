@@ -1,4 +1,4 @@
-package com.coin.exchanger.order;
+package com.coin.exchanger.market.currency;
 
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository;
  * @author Semih Beceren
  */
 @Repository
-public interface OrderRepository extends CrudRepository<Order, Long> {
+public interface CurrencyRepository extends CrudRepository<Currency, Long> {
 }
