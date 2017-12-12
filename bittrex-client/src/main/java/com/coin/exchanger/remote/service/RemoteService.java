@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.List;
+
 @Service
 public class RemoteService {
 
@@ -55,7 +57,28 @@ public class RemoteService {
                 .fromUriString(URI+"getorderbook")
                 .queryParam("market", market)
                 .queryParam("type", orderType.getKey());
-        return this.restTemplate.<ResponseWrapper<OrderBook>>getForObject(builder.toUriString(),(Class<ResponseWrapper<OrderBook>>)(Class<?>)ResponseWrapper.class);
+
+        if(OrderType.BOTH == orderType)
+            return this.restTemplate.<ResponseWrapper<OrderBook>>getForObject(builder.toUriString(),(Class<ResponseWrapper<OrderBook>>)(Class<?>)ResponseWrapper.class);
+        else
+            return getOrderListWrapper(this.restTemplate.getForObject(builder.toUriString(),(Class<ResponseWrapper<List<Order>>>)(Class<?>)ResponseWrapper.class), orderType);
+
+    }
+
+    private ResponseWrapper<OrderBook> getOrderListWrapper(ResponseWrapper<List<Order>> listResponseWrapper, OrderType orderType){
+        ResponseWrapper<OrderBook> responseWrapper = new ResponseWrapper<>();
+        OrderBook orderBook = new OrderBook();
+
+        if(OrderType.BUY == orderType)
+            orderBook.setBuy(listResponseWrapper.getResult());
+
+        if (OrderType.SELL == orderType)
+            orderBook.setSell(listResponseWrapper.getResult());
+
+        responseWrapper.setMessage(listResponseWrapper.getMessage());
+        responseWrapper.setSuccess(listResponseWrapper.getSuccess());
+        responseWrapper.setResult(orderBook);
+        return responseWrapper;
     }
 
     public ResponseListWrapper<MarketHistory> getMarketHistoryRestCall(String market){
