@@ -10,22 +10,22 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OrderBook {
 
-    private HashMap<OrderType,List<Order>> buy;
-    private HashMap<OrderType,List<Order>> sell;
+    private List<Order> buy;
+    private List<Order> sell;
 
-    public HashMap<OrderType, List<Order>> getBuy() {
+    public List<Order> getBuy() {
         return buy;
     }
 
-    public void setBuy(HashMap<OrderType, List<Order>> buy) {
+    public void setBuy(List<Order> buy) {
         this.buy = buy;
     }
 
-    public HashMap<OrderType, List<Order>> getSell() {
+    public List<Order> getSell() {
         return sell;
     }
 
-    public void setSell(HashMap<OrderType, List<Order>> sell) {
+    public void setSell(List<Order> sell) {
         this.sell = sell;
     }
 }
