@@ -3,7 +3,7 @@ package com.coin.exchanger.remote.response;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Market {
+public class MarketHolder {
 
     private String marketCurrency;
     private String baseCurrency;

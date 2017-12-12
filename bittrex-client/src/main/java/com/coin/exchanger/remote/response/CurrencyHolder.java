@@ -1,14 +1,21 @@
 package com.coin.exchanger.remote.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Currency {
+public class CurrencyHolder {
+    @JsonProperty
     private String currency;
+    @JsonProperty
     private Integer currencyLong;
+    @JsonProperty
     private Double txFee;
+    @JsonProperty
     private Boolean isActive;
+    @JsonProperty
     private String coinType;
+    @JsonProperty
     private Object baseAddress;
 
     public String getCurrency() {

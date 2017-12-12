@@ -21,6 +21,7 @@ public class Market {
     private Currency marketCurrency;
     @ManyToOne
     private Currency baseCurrency;
+    @Column(unique = true)
     private String marketName;
     @OneToMany(cascade = CascadeType.REMOVE, mappedBy = "market", fetch = FetchType.LAZY)
     private List<MarketSummary> marketSummaries;

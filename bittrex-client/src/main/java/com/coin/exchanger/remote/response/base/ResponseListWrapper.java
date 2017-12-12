@@ -1,5 +1,7 @@
 package com.coin.exchanger.remote.response.base;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.List;
 
 /**
@@ -7,6 +9,7 @@ import java.util.List;
  */
 public class ResponseListWrapper<T> extends BaseResponse {
 
+    @JsonProperty
     private List<T> result;
 
     public List<T> getResult() {

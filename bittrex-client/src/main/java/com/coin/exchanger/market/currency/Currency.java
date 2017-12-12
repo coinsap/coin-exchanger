@@ -14,6 +14,7 @@ public class Currency {
     @Id
     @GeneratedValue
     private Long id;
+    @Column(unique = true)
     private String currency;
     private Double txFee;
     private Boolean isActive;

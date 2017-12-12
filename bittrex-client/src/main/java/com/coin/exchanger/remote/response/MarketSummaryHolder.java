@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.Date;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class MarketSummary {
+public class MarketSummaryHolder {
     private  String marketName;
     private Double high;
     private Double low;

@@ -5,24 +5,24 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class OrderBook {
+public class OrderBookHolder {
 
-    private List<Order> buy;
-    private List<Order> sell;
+    private List<OrderHolder> buy;
+    private List<OrderHolder> sell;
 
-    public List<Order> getBuy() {
+    public List<OrderHolder> getBuy() {
         return buy;
     }
 
-    public void setBuy(List<Order> buy) {
+    public void setBuy(List<OrderHolder> buy) {
         this.buy = buy;
     }
 
-    public List<Order> getSell() {
+    public List<OrderHolder> getSell() {
         return sell;
     }
 
-    public void setSell(List<Order> sell) {
+    public void setSell(List<OrderHolder> sell) {
         this.sell = sell;
     }
 }

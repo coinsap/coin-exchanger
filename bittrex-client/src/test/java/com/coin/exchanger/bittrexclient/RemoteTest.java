@@ -23,10 +23,9 @@ public class RemoteTest {
     @Autowired
     private RemoteService remoteService;
 
-
     @Test
     public void testMarkets() {
-        ResponseListWrapper<Market> markets = remoteService.getMarketsRestCall();
+        ResponseListWrapper<MarketHolder> markets = remoteService.getMarketsRestCall();
         assertNotNull(markets);
         assertEquals(markets.getSuccess(), Boolean.TRUE);
         assertNotNull(markets.getResult());
@@ -35,7 +34,7 @@ public class RemoteTest {
 
     @Test
     public void testCurrencies() {
-        ResponseListWrapper<Currency> currencies = remoteService.getCurrenciesRestCall();
+        ResponseListWrapper<CurrencyHolder> currencies = remoteService.getCurrenciesRestCall();
         assertNotNull(currencies);
         assertEquals(currencies.getSuccess(), Boolean.TRUE);
         assertNotNull(currencies.getResult());
@@ -44,7 +43,7 @@ public class RemoteTest {
 
     @Test
     public void testTicker() {
-        ResponseWrapper<Ticker> ticker = remoteService.getTickerRestCall("BTC-LTC");
+        ResponseWrapper<TickerHolder> ticker = remoteService.getTickerRestCall("BTC-LTC");
         assertNotNull(ticker);
         assertEquals(ticker.getSuccess(), Boolean.TRUE);
         assertNotNull(ticker.getResult());
@@ -52,7 +51,7 @@ public class RemoteTest {
 
     @Test
     public void testMarketSummaries() {
-        ResponseListWrapper<MarketSummary> marketSummaries = remoteService.getMarketSummariesRestCall();
+        ResponseListWrapper<MarketSummaryHolder> marketSummaries = remoteService.getMarketSummariesRestCall();
         assertNotNull(marketSummaries);
         assertEquals(marketSummaries.getSuccess(), Boolean.TRUE);
         assertNotNull(marketSummaries.getResult());
@@ -61,7 +60,7 @@ public class RemoteTest {
 
     @Test
     public void testMarketSummary() {
-        ResponseWrapper<MarketSummary> marketSummary = remoteService.getMarketSummaryRestCall("BTC-LTC");
+        ResponseWrapper<MarketSummaryHolder> marketSummary = remoteService.getMarketSummaryRestCall("BTC-LTC");
         assertNotNull(marketSummary);
         assertEquals(marketSummary.getSuccess(), Boolean.TRUE);
         assertNotNull(marketSummary.getResult());
@@ -69,7 +68,7 @@ public class RemoteTest {
 
     @Test
     public void testOrderBook() {
-        ResponseWrapper<OrderBook> orderBook = remoteService.getOrderBookRestCall("BTC-LTC");
+        ResponseWrapper<OrderBookHolder> orderBook = remoteService.getOrderBookRestCall("BTC-LTC");
         assertNotNull(orderBook);
         assertEquals(orderBook.getSuccess(), Boolean.TRUE);
         assertNotNull(orderBook.getResult());
@@ -79,7 +78,7 @@ public class RemoteTest {
 
     @Test
     public void testMarketHistory() {
-        ResponseListWrapper<MarketHistory> marketHistories = remoteService.getMarketHistoryRestCall("BTC-LTC");
+        ResponseListWrapper<MarketHistoryHolder> marketHistories = remoteService.getMarketHistoryRestCall("BTC-LTC");
         assertNotNull(marketHistories);
         assertEquals(marketHistories.getSuccess(), Boolean.TRUE);
         assertNotNull(marketHistories.getResult());
