@@ -1,25 +1,37 @@
 package com.coin.exchanger.remote.response;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Date;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class MarketSummaryHolder {
+    @JsonProperty(value = "MarketName")
     private  String marketName;
+    @JsonProperty(value = "High")
     private Double high;
+    @JsonProperty(value = "Low")
     private Double low;
+    @JsonProperty(value = "Volume")
     private Double volume;
+    @JsonProperty(value = "Last")
     private Double last;
+    @JsonProperty(value = "BaseVolume")
     private Double baseVolume;
+    @JsonProperty(value = "TimeStamp")
     private Date timeStamp;
+    @JsonProperty(value = "Bid")
     private Double bid;
+    @JsonProperty(value = "Ask")
     private Double ask;
+    @JsonProperty(value = "OpenBuyOrders")
     private Integer openBuyOrders;
+    @JsonProperty(value = "OpenSellOrders")
     private Integer openSellOrders;
+    @JsonProperty(value = "PrevDay")
     private Double prevDay;
+    @JsonProperty(value = "Created")
     private Date created;
-    private Object displayMarketName;
 
     public String getMarketName() {
         return marketName;
@@ -125,11 +137,4 @@ public class MarketSummaryHolder {
         this.created = created;
     }
 
-    public Object getDisplayMarketName() {
-        return displayMarketName;
-    }
-
-    public void setDisplayMarketName(Object displayMarketName) {
-        this.displayMarketName = displayMarketName;
-    }
 }
