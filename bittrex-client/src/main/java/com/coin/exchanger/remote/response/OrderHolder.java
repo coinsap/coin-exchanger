@@ -1,14 +1,12 @@
 package com.coin.exchanger.remote.response;
 
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class OrderHolder {
-
-    public OrderHolder(Double quantity, Double rate) {
-        this.quantity = quantity;
-        this.rate = rate;
-    }
-
+    @JsonProperty(value = "Quantity")
     private Double quantity;
+    @JsonProperty(value = "Rate")
     private Double rate;
 
     public Double getQuantity() {
