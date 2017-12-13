@@ -1,10 +1,8 @@
 package com.coin.exchanger.remote.response;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.List;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class OrderBookHolder {
 
     private List<OrderHolder> buy;
