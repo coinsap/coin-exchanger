@@ -12,6 +12,7 @@ import java.util.List;
  * @author Semih Beceren
  */
 @Entity
+@Table(indexes = {@Index(name = "market_name_idx", columnList = "marketName", unique = true)})
 public class Market {
 
     @Id

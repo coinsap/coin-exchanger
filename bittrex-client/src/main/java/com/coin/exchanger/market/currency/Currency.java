@@ -9,6 +9,7 @@ import java.util.List;
  * @author Semih Beceren
  */
 @Entity
+@Table(indexes = {@Index(name = "currency_idx", columnList = "currency", unique = true)})
 public class Currency {
 
     @Id

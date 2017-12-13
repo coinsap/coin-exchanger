@@ -22,6 +22,9 @@ public class MarketHistory {
     @Enumerated(EnumType.ORDINAL)
     private FillType fillType;
 
+    @Column(unique = true)
+    private Long apiId;
+
     private Double quantity;
 
     private Double price;
@@ -33,7 +36,7 @@ public class MarketHistory {
 
     private Date timestamp;
 
-    public MarketHistory(Market market, FillType fillType, Double quantity, Double price, Double total, OrderType orderType, Date timestamp) {
+    public MarketHistory(Market market, FillType fillType, Long apiId, Double quantity, Double price, Double total, OrderType orderType, Date timestamp) {
         this.market = market;
         this.fillType = fillType;
         this.quantity = quantity;
@@ -41,6 +44,7 @@ public class MarketHistory {
         this.total = total;
         this.orderType = orderType;
         this.timestamp = timestamp;
+        this.apiId = apiId;
     }
 
     public MarketHistory() {
@@ -108,5 +112,13 @@ public class MarketHistory {
 
     public void setTimestamp(Date timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public Long getApiId() {
+        return apiId;
+    }
+
+    public void setApiId(Long apiId) {
+        this.apiId = apiId;
     }
 }
