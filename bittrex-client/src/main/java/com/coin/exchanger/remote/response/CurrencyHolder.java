@@ -1,22 +1,20 @@
 package com.coin.exchanger.remote.response;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class CurrencyHolder {
-    @JsonProperty
+    @JsonProperty(value = "Currency")
     private String currency;
-    @JsonProperty
-    private Integer currencyLong;
-    @JsonProperty
+    @JsonProperty(value = "CurrencyLong")
+    private String currencyLong;
+    @JsonProperty(value = "TxFee")
     private Double txFee;
-    @JsonProperty
+    @JsonProperty(value = "IsActive")
     private Boolean isActive;
-    @JsonProperty
+    @JsonProperty(value = "CoinType")
     private String coinType;
-    @JsonProperty
-    private Object baseAddress;
+    @JsonProperty(value = "BaseAddress")
+    private String baseAddress;
 
     public String getCurrency() {
         return currency;
@@ -26,11 +24,11 @@ public class CurrencyHolder {
         this.currency = currency;
     }
 
-    public Integer getCurrencyLong() {
+    public String getCurrencyLong() {
         return currencyLong;
     }
 
-    public void setCurrencyLong(Integer currencyLong) {
+    public void setCurrencyLong(String currencyLong) {
         this.currencyLong = currencyLong;
     }
 
@@ -58,11 +56,11 @@ public class CurrencyHolder {
         this.coinType = coinType;
     }
 
-    public Object getBaseAddress() {
+    public String getBaseAddress() {
         return baseAddress;
     }
 
-    public void setBaseAddress(Object baseAddress) {
+    public void setBaseAddress(String baseAddress) {
         this.baseAddress = baseAddress;
     }
 }
