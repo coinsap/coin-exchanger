@@ -3,18 +3,25 @@ package com.coin.exchanger.remote.response;
 
 import com.coin.exchanger.market.history.FillType;
 import com.coin.exchanger.market.order.OrderType;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Date;
-@JsonIgnoreProperties(ignoreUnknown = true)
+
 public class MarketHistoryHolder {
 
+    @JsonProperty(value = "Id")
     private Long id;
+    @JsonProperty(value = "TimeStamp")
     private Date timeStamp;
+    @JsonProperty(value = "Quantity")
     private Double quantity;
+    @JsonProperty(value = "Price")
     private Double price;
+    @JsonProperty(value = "Total")
     private Double total;
+    @JsonProperty(value = "FillType")
     private FillType fillType;
+    @JsonProperty(value = "OrderType")
     private OrderType orderType;
 
     public Long getId() {
