@@ -1,12 +1,13 @@
 package com.coin.exchanger.remote.response;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class TickerHolder {
-
+    @JsonProperty(value = "Bid")
     private Double bid;
+    @JsonProperty(value = "Ask")
     private Double ask;
+    @JsonProperty(value = "Last")
     private Double last;
 
     public Double getBid() {
