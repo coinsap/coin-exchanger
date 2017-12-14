@@ -2,6 +2,7 @@ package com.coin.exchanger.market.summary;
 
 import com.coin.exchanger.market.Market;
 import com.coin.exchanger.market.summary.ticker.Ticker;
+import org.springframework.util.DigestUtils;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -10,6 +11,7 @@ import java.util.Date;
  * @author Semih Beceren
  */
 @Entity
+@Table(indexes = {@Index(name = "summary_hash_Idx", unique = true, columnList = "hash")})
 public class MarketSummary {
 
     @Id
@@ -27,12 +29,13 @@ public class MarketSummary {
     private Integer openBuyOrders;
     private Integer openSellOrders;
     private Double prevDay;
-    private Date created;
+    @Column(unique = true)
+    private String hash;
 
     public MarketSummary() {
     }
 
-    public MarketSummary(Market market, Double high, Double low, Double volume, Double baseVolume, Ticker ticker, Date timeStamp, Integer openBuyOrders, Integer openSellOrders, Double prevDay, Date created) {
+    public MarketSummary(Market market, Double high, Double low, Double volume, Double baseVolume, Ticker ticker, Date timeStamp, Integer openBuyOrders, Integer openSellOrders, Double prevDay) {
         this.market = market;
         this.high = high;
         this.low = low;
@@ -43,7 +46,7 @@ public class MarketSummary {
         this.openBuyOrders = openBuyOrders;
         this.openSellOrders = openSellOrders;
         this.prevDay = prevDay;
-        this.created = created;
+        this.hash = DigestUtils.md5DigestAsHex((market.getMarketName() + timeStamp).getBytes());
     }
 
     public Long getId() {
@@ -126,12 +129,12 @@ public class MarketSummary {
         this.prevDay = prevDay;
     }
 
-    public Date getCreated() {
-        return created;
+    public String getHash() {
+        return hash;
     }
 
-    public void setCreated(Date created) {
-        this.created = created;
+    public void setHash(String hash) {
+        this.hash = hash;
     }
 
     public Ticker getTicker() {

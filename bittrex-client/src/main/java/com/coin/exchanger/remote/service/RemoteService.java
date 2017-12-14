@@ -1,6 +1,5 @@
 package com.coin.exchanger.remote.service;
 
-import com.coin.exchanger.market.order.OrderType;
 import com.coin.exchanger.remote.response.*;
 import com.coin.exchanger.remote.response.base.ResponseListWrapper;
 import com.coin.exchanger.remote.response.base.ResponseWrapper;
@@ -45,17 +44,12 @@ public class RemoteService {
         return this.restTemplate.exchange(URI + "getmarketsummaries", HttpMethod.GET, null, parameterizedTypeReference).getBody();
     }
 
-    public ResponseWrapper<MarketSummaryHolder> getMarketSummaryRestCall(String market) {
+    public ResponseListWrapper<MarketSummaryHolder> getMarketSummaryRestCall(String market) {
         ParameterizedTypeReference<ResponseListWrapper<MarketSummaryHolder>> parameterizedTypeReference = new ParameterizedTypeReference<ResponseListWrapper<MarketSummaryHolder>>() {};
         UriComponentsBuilder builder = UriComponentsBuilder
                 .fromUriString(URI+"getmarketsummary")
                 .queryParam("market", market);
-        ResponseListWrapper<MarketSummaryHolder> marketSummaryHolderResponseListWrapper = this.restTemplate.exchange(builder.toUriString(), HttpMethod.GET, null, parameterizedTypeReference).getBody();
-        ResponseWrapper<MarketSummaryHolder> marketSummaryHolderResponseWrapper = new ResponseWrapper<>();
-        marketSummaryHolderResponseWrapper.setResult(marketSummaryHolderResponseListWrapper.getResult().get(0));
-        marketSummaryHolderResponseWrapper.setSuccess(marketSummaryHolderResponseListWrapper.getSuccess());
-        marketSummaryHolderResponseWrapper.setMessage(marketSummaryHolderResponseListWrapper.getMessage());
-        return marketSummaryHolderResponseWrapper;
+        return this.restTemplate.exchange(builder.toUriString(), HttpMethod.GET, null, parameterizedTypeReference).getBody();
     }
 
     public ResponseWrapper<OrderBookHolder> getOrderBookRestCall(String market) {

@@ -1,4 +1,4 @@
-package com.coin.exchanger.market.order;
+package com.coin.exchanger.remote.response;
 
 /**
  * @author Semih Beceren

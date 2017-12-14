@@ -8,4 +8,5 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface MarketHistoryRepository extends CrudRepository<MarketHistory, Long> {
+    MarketHistory findByApiId(Long apiId);
 }

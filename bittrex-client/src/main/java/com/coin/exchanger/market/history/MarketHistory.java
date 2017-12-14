@@ -1,7 +1,7 @@
 package com.coin.exchanger.market.history;
 
 import com.coin.exchanger.market.Market;
-import com.coin.exchanger.market.order.OrderType;
+import com.coin.exchanger.remote.response.OrderType;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -10,6 +10,7 @@ import java.util.Date;
  * @author Semih Beceren
  */
 @Entity
+@Table(indexes = {@Index(name = "apiId_Idx", unique = true, columnList = "apiId")})
 public class MarketHistory {
 
     @Id

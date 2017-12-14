@@ -60,7 +60,7 @@ public class RemoteTest {
 
     @Test
     public void testMarketSummary() {
-        ResponseWrapper<MarketSummaryHolder> marketSummary = remoteService.getMarketSummaryRestCall("BTC-LTC");
+        ResponseListWrapper<MarketSummaryHolder> marketSummary = remoteService.getMarketSummaryRestCall("BTC-LTC");
         assertNotNull(marketSummary);
         assertEquals(marketSummary.getSuccess(), Boolean.TRUE);
         assertNotNull(marketSummary.getResult());

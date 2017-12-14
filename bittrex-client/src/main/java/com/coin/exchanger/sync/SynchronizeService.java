@@ -6,20 +6,25 @@ import com.coin.exchanger.market.currency.Currency;
 import com.coin.exchanger.market.currency.CurrencyRepository;
 import com.coin.exchanger.market.history.MarketHistory;
 import com.coin.exchanger.market.history.MarketHistoryRepository;
-import com.coin.exchanger.remote.response.CurrencyHolder;
-import com.coin.exchanger.remote.response.MarketHistoryHolder;
-import com.coin.exchanger.remote.response.MarketHolder;
+import com.coin.exchanger.market.order.Buy;
+import com.coin.exchanger.market.order.BuyRepository;
+import com.coin.exchanger.market.order.Sell;
+import com.coin.exchanger.market.order.SellRepository;
+import com.coin.exchanger.market.summary.MarketSummary;
+import com.coin.exchanger.market.summary.MarketSummaryRepository;
+import com.coin.exchanger.market.summary.ticker.Ticker;
+import com.coin.exchanger.remote.response.*;
 import com.coin.exchanger.remote.response.base.ResponseListWrapper;
+import com.coin.exchanger.remote.response.base.ResponseWrapper;
 import com.coin.exchanger.remote.service.RemoteService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.DigestUtils;
 
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * @author Semih Beceren
@@ -33,16 +38,19 @@ public class SynchronizeService {
     private final RemoteService remoteService;
     private final MarketHistoryRepository marketHistoryRepository;
     private final MarketSummaryRepository marketSummaryRepository;
-    private static Set<Long> MARKET_HISTORY_HOLDER_ID_TEMPORAL_LIST = new HashSet<>();
-    private static Map<String, Date> MARKET_SUMMARY_HOLDER_TEMPORAL_MAP = new HashMap<>();
+    private static Set<Market> MARKETS;
+    private final BuyRepository buyRepository;
+    private final SellRepository sellRepository;
 
     @Autowired
-    public SynchronizeService(MarketRepository marketRepository, MarketHistoryRepository marketHistoryRepository, CurrencyRepository currencyRepository, RemoteService remoteService, MarketSummaryRepository marketSummaryRepository) {
+    public SynchronizeService(MarketRepository marketRepository, MarketHistoryRepository marketHistoryRepository, CurrencyRepository currencyRepository, RemoteService remoteService, MarketSummaryRepository marketSummaryRepository, BuyRepository buyRepository, SellRepository sellRepository) {
         this.marketRepository = marketRepository;
         this.marketHistoryRepository = marketHistoryRepository;
         this.currencyRepository = currencyRepository;
         this.remoteService = remoteService;
         this.marketSummaryRepository = marketSummaryRepository;
+        this.buyRepository = buyRepository;
+        this.sellRepository = sellRepository;
     }
 
 
@@ -71,47 +79,40 @@ public class SynchronizeService {
             logger.info("Markets count on Request: {}", marketHolderResponseListWrapper.getResult().size());
             marketHolderResponseListWrapper.getResult()
                     .stream()
+                    .limit(5)
                     .filter(marketHolder -> !markets.contains(marketHolder.getMarketName()))
-                    .map(marketHolder -> new Market(currencyRepository.findByCurrency(marketHolder.getMarketCurrency()), currencyRepository.findByCurrency(marketHolder.getBaseCurrency()), marketHolder.getMarketName(), marketHolder.getMinTradeSize(), marketHolder.getActive(), marketHolder.getCreated()))
+                    .map(marketHolder -> new Market(currencyRepository.findByCurrency(marketHolder.getMarketCurrency()), currencyRepository.findByCurrency(marketHolder.getBaseCurrency()), marketHolder.getMarketName(), marketHolder.getMinTradeSize(), marketHolder.getActive()))
                     .forEach(marketRepository::save);
             logger.info("End Market Sync");
         }
+        MARKETS = marketRepository.findAll();
     }
 
     public void syncMarketHistory() {
-        Set<Market> markets = marketRepository.findAll();
         logger.info("Start Market History Sync");
-        markets.forEach(market -> {
+        MARKETS.forEach(market -> {
             ResponseListWrapper<MarketHistoryHolder> marketHistoryHolderResponseListWrapper = remoteService.getMarketHistoryRestCall(market.getMarketName());
             if (isResponseSuccess(marketHistoryHolderResponseListWrapper)) {
                 marketHistoryHolderResponseListWrapper.getResult()
                         .stream()
-                        .filter(marketHistoryHolder -> !MARKET_HISTORY_HOLDER_ID_TEMPORAL_LIST.contains(marketHistoryHolder.getId()))
+                        .filter(marketHistoryHolder -> Objects.isNull(marketHistoryRepository.findByApiId(marketHistoryHolder.getId())))
                         .map(marketHistoryHolder -> new MarketHistory(market, marketHistoryHolder.getFillType(), marketHistoryHolder.getId(), marketHistoryHolder.getQuantity(), marketHistoryHolder.getPrice(), marketHistoryHolder.getTotal(), marketHistoryHolder.getOrderType(), marketHistoryHolder.getTimeStamp()))
                         .forEach(marketHistoryRepository::save);
-
-                MARKET_HISTORY_HOLDER_ID_TEMPORAL_LIST = marketHistoryHolderResponseListWrapper.getResult().stream().map(MarketHistoryHolder::getId).collect(Collectors.toSet());
             }
         });
         logger.info("End Market History Sync");
     }
 
     public void syncMarketSummary(){
-        Set<Market> markets = marketRepository.findAll();
         logger.info("Start Market Summary Sync");
-        markets.forEach(market -> {
+        MARKETS.forEach(market -> {
             ResponseListWrapper<MarketSummaryHolder> marketSummaryHolderResponseListWrapper = remoteService.getMarketSummaryRestCall(market.getMarketName());
             if(isResponseSuccess(marketSummaryHolderResponseListWrapper)){
                 marketSummaryHolderResponseListWrapper.getResult()
                         .stream()
-                        .filter(marketSummaryHolder -> !MARKET_SUMMARY_HOLDER_TEMPORAL_MAP.get(market.getMarketName()).equals(marketSummaryHolder.getTimeStamp()))
-                        .map(marketSummaryHolder -> new MarketSummary(market, marketSummaryHolder.getHigh(), marketSummaryHolder.getLow(), marketSummaryHolder.getVolume(), marketSummaryHolder.getBaseVolume(), new Ticker(marketSummaryHolder.getBid(), marketSummaryHolder.getAsk(), marketSummaryHolder.getLast()), marketSummaryHolder.getTimeStamp(), marketSummaryHolder.getOpenBuyOrders(), marketSummaryHolder.getOpenSellOrders(), marketSummaryHolder.getPrevDay(), marketSummaryHolder.getCreated()))
+                        .filter(marketSummaryHolder -> Objects.isNull(marketSummaryRepository.findByHash(DigestUtils.md5DigestAsHex((marketSummaryHolder.getMarketName() + marketSummaryHolder.getTimeStamp()).getBytes()))))
+                        .map(marketSummaryHolder -> new MarketSummary(market, marketSummaryHolder.getHigh(), marketSummaryHolder.getLow(), marketSummaryHolder.getVolume(), marketSummaryHolder.getBaseVolume(), new Ticker(marketSummaryHolder.getBid(), marketSummaryHolder.getAsk(), marketSummaryHolder.getLast()), marketSummaryHolder.getTimeStamp(), marketSummaryHolder.getOpenBuyOrders(), marketSummaryHolder.getOpenSellOrders(), marketSummaryHolder.getPrevDay()))
                         .forEach(marketSummaryRepository::save);
-
-                MARKET_SUMMARY_HOLDER_TEMPORAL_MAP = marketSummaryHolderResponseListWrapper.getResult()
-                        .stream()
-                        .collect(Collectors.toMap(MarketSummaryHolder::getMarketName, MarketSummaryHolder::getTimeStamp));
-
             }
         });
         logger.info("End Market Summary Sync");
@@ -119,15 +120,24 @@ public class SynchronizeService {
 
     public void syncOrderBook(){
         Set<Market> markets = marketRepository.findAll();
-        logger.info("Start Order Book Sync");
+        logger.info("Start Buy Book Sync");
         markets.forEach(market -> {
             ResponseWrapper<OrderBookHolder> orderBookHolderResponseWrapper = remoteService.getOrderBookRestCall(market.getMarketName());
             if(Objects.nonNull(orderBookHolderResponseWrapper.getResult()) && orderBookHolderResponseWrapper.getSuccess()){
-                orderBookHolderResponseWrapper.getResult().getBuy().stream()
-                        .map(orderHolder -> orderHolder.)
+                orderBookHolderResponseWrapper.getResult().getBuy()
+                        .stream()
+                        .filter(orderHolder -> Objects.isNull(buyRepository.findByHash(DigestUtils.md5DigestAsHex((market.getMarketName() + orderHolder.getQuantity().toString() + orderHolder.getRate().toString()).getBytes()))))
+                        .map(orderHolder -> new Buy(orderHolder.getQuantity(), orderHolder.getRate(), market))
+                        .forEach(buyRepository::save);
+
+                orderBookHolderResponseWrapper.getResult().getSell()
+                        .stream()
+                        .filter(orderHolder -> Objects.isNull(sellRepository.findByHash(DigestUtils.md5DigestAsHex((market.getMarketName() + orderHolder.getQuantity().toString() + orderHolder.getRate().toString()).getBytes()))))
+                        .map(orderHolder -> new Sell(orderHolder.getQuantity(), orderHolder.getRate(), market))
+                        .forEach(sellRepository::save);
             }
         });
-        logger.info("End Order Book Sync");
+        logger.info("End Buy Book Sync");
     }
 
     private boolean isResponseSuccess(ResponseListWrapper<?> responseListWrapper) {

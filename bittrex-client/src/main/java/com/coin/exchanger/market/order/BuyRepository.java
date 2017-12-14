@@ -7,5 +7,6 @@ import org.springframework.stereotype.Repository;
  * @author Semih Beceren
  */
 @Repository
-public interface OrderRepository extends CrudRepository<Order, Long> {
+public interface BuyRepository extends CrudRepository<Buy, Long> {
+    Buy findByHash(String hash);
 }

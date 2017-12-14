@@ -2,10 +2,11 @@ package com.coin.exchanger.market;
 
 import com.coin.exchanger.market.currency.Currency;
 import com.coin.exchanger.market.history.MarketHistory;
+import com.coin.exchanger.market.order.Buy;
+import com.coin.exchanger.market.order.Sell;
 import com.coin.exchanger.market.summary.MarketSummary;
 
 import javax.persistence.*;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -28,20 +29,22 @@ public class Market {
     private List<MarketSummary> marketSummaries;
     @OneToMany(cascade = CascadeType.REMOVE, mappedBy = "market", fetch = FetchType.LAZY)
     private List<MarketHistory> marketHistories;
+    @OneToMany(cascade = CascadeType.REMOVE, mappedBy = "market", fetch = FetchType.LAZY)
+    private List<Buy> buyList;
+    @OneToMany(cascade = CascadeType.REMOVE, mappedBy = "market", fetch = FetchType.LAZY)
+    private List<Sell> selList;
     private Double minTradeSize;
     private Boolean isActive;
-    private Date createdAt;
 
     public Market() {
     }
 
-    public Market(Currency marketCurrency, Currency baseCurrency, String marketName, Double minTradeSize, Boolean isActive, Date createdAt) {
+    public Market(Currency marketCurrency, Currency baseCurrency, String marketName, Double minTradeSize, Boolean isActive) {
         this.marketCurrency = marketCurrency;
         this.baseCurrency = baseCurrency;
         this.marketName = marketName;
         this.minTradeSize = minTradeSize;
         this.isActive = isActive;
-        this.createdAt = createdAt;
     }
 
     public Long getId() {
@@ -84,14 +87,6 @@ public class Market {
         isActive = active;
     }
 
-    public Date getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
-    }
-
     public String getMarketName() {
         return marketName;
     }
@@ -129,5 +124,21 @@ public class Market {
 
     public void setMarketHistories(List<MarketHistory> marketHistories) {
         this.marketHistories = marketHistories;
+    }
+
+    public List<Buy> getBuyList() {
+        return buyList;
+    }
+
+    public void setBuyList(List<Buy> buyList) {
+        this.buyList = buyList;
+    }
+
+    public List<Sell> getSelList() {
+        return selList;
+    }
+
+    public void setSelList(List<Sell> selList) {
+        this.selList = selList;
     }
 }

@@ -7,15 +7,11 @@ import com.coin.exchanger.market.currency.CurrencyRepository;
 import com.coin.exchanger.market.history.FillType;
 import com.coin.exchanger.market.history.MarketHistory;
 import com.coin.exchanger.market.history.MarketHistoryRepository;
-import com.coin.exchanger.market.order.Order;
-import com.coin.exchanger.market.order.OrderRepository;
-import com.coin.exchanger.market.order.OrderType;
-import com.coin.exchanger.market.order.book.OrderBook;
-import com.coin.exchanger.market.order.book.OrderBookRepository;
 import com.coin.exchanger.market.summary.MarketSummary;
 import com.coin.exchanger.market.summary.MarketSummaryRepository;
 import com.coin.exchanger.market.summary.ticker.Ticker;
 import com.coin.exchanger.market.summary.ticker.TickerRepository;
+import com.coin.exchanger.remote.response.OrderType;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,12 +41,6 @@ public class RepositoryTest {
     private MarketSummaryRepository marketSummaryRepository;
 
     @Autowired
-    private OrderRepository orderRepository;
-
-    @Autowired
-    private OrderBookRepository orderBookRepository;
-
-    @Autowired
     private TickerRepository tickerRepository;
 
     private Currency createCurrency() {
@@ -58,7 +48,7 @@ public class RepositoryTest {
     }
 
     private Market createMarket() {
-        return marketRepository.save(new Market(createCurrency(), createCurrency(), "TEST", 0.01, true, new Date()));
+        return marketRepository.save(new Market(createCurrency(), createCurrency(), "TEST", 0.01, true));
     }
 
     private Ticker createTicker() {
@@ -67,19 +57,11 @@ public class RepositoryTest {
 
     private MarketSummary createMarketSummary() {
         Ticker ticker = new Ticker(0.01, 0.01, 0.01);
-        return marketSummaryRepository.save(new MarketSummary(createMarket(), 0.01, 0.01, 0.01, 0.01, ticker, new Date(), 2, 2, 0.01, new Date()));
+        return marketSummaryRepository.save(new MarketSummary(createMarket(), 0.01, 0.01, 0.01, 0.01, ticker, new Date(), 2, 2, 0.01));
     }
 
     private MarketHistory createMarketHistory() {
-        return marketHistoryRepository.save(new MarketHistory(createMarket(), FillType.FILL, 0.01, 0.01, 0.01, OrderType.BUY, new Date()));
-    }
-
-    private Order createOrder() {
-        return orderRepository.save(new Order(0.01, 0.01));
-    }
-
-    private OrderBook createOrderBook() {
-        return orderBookRepository.save(new OrderBook(OrderType.BUY, new Order(0.01, 0.01)));
+        return marketHistoryRepository.save(new MarketHistory(createMarket(), FillType.FILL, 2L, 0.01, 0.01, 0.01, OrderType.BUY, new Date()));
     }
 
     @Test
@@ -107,14 +89,6 @@ public class RepositoryTest {
         Assert.assertNotNull(createMarketHistory());
     }
 
-    @Test
-    public void orderTest() {
-        Assert.assertNotNull(createOrder());
-    }
 
-    @Test
-    public void orderBookTest() {
-        Assert.assertNotNull(createOrderBook());
-    }
 
 }

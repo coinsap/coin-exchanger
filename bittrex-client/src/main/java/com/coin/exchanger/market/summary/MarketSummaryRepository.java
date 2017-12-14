@@ -8,4 +8,5 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface MarketSummaryRepository extends CrudRepository<MarketSummary, Long> {
+    MarketSummary findByHash(String hash);
 }
