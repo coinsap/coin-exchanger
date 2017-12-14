@@ -26,21 +26,23 @@ import java.util.stream.Collectors;
  */
 @Service
 public class SynchronizeService {
-
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private final MarketRepository marketRepository;
-    private static Set<Long> MARKET_HISTORY_HOLDER_ID_TEMPORAL_LIST = new HashSet<>();
     private final CurrencyRepository currencyRepository;
     private final RemoteService remoteService;
     private final MarketHistoryRepository marketHistoryRepository;
+    private final MarketSummaryRepository marketSummaryRepository;
+    private static Set<Long> MARKET_HISTORY_HOLDER_ID_TEMPORAL_LIST = new HashSet<>();
+    private static Map<String, Date> MARKET_SUMMARY_HOLDER_TEMPORAL_MAP = new HashMap<>();
 
     @Autowired
-    public SynchronizeService(MarketRepository marketRepository, MarketHistoryRepository marketHistoryRepository, CurrencyRepository currencyRepository, RemoteService remoteService) {
+    public SynchronizeService(MarketRepository marketRepository, MarketHistoryRepository marketHistoryRepository, CurrencyRepository currencyRepository, RemoteService remoteService, MarketSummaryRepository marketSummaryRepository) {
         this.marketRepository = marketRepository;
         this.marketHistoryRepository = marketHistoryRepository;
         this.currencyRepository = currencyRepository;
         this.remoteService = remoteService;
+        this.marketSummaryRepository = marketSummaryRepository;
     }
 
 
@@ -78,6 +80,7 @@ public class SynchronizeService {
 
     public void syncMarketHistory() {
         Set<Market> markets = marketRepository.findAll();
+        logger.info("Start Market History Sync");
         markets.forEach(market -> {
             ResponseListWrapper<MarketHistoryHolder> marketHistoryHolderResponseListWrapper = remoteService.getMarketHistoryRestCall(market.getMarketName());
             if (isResponseSuccess(marketHistoryHolderResponseListWrapper)) {
@@ -90,6 +93,41 @@ public class SynchronizeService {
                 MARKET_HISTORY_HOLDER_ID_TEMPORAL_LIST = marketHistoryHolderResponseListWrapper.getResult().stream().map(MarketHistoryHolder::getId).collect(Collectors.toSet());
             }
         });
+        logger.info("End Market History Sync");
+    }
+
+    public void syncMarketSummary(){
+        Set<Market> markets = marketRepository.findAll();
+        logger.info("Start Market Summary Sync");
+        markets.forEach(market -> {
+            ResponseListWrapper<MarketSummaryHolder> marketSummaryHolderResponseListWrapper = remoteService.getMarketSummaryRestCall(market.getMarketName());
+            if(isResponseSuccess(marketSummaryHolderResponseListWrapper)){
+                marketSummaryHolderResponseListWrapper.getResult()
+                        .stream()
+                        .filter(marketSummaryHolder -> !MARKET_SUMMARY_HOLDER_TEMPORAL_MAP.get(market.getMarketName()).equals(marketSummaryHolder.getTimeStamp()))
+                        .map(marketSummaryHolder -> new MarketSummary(market, marketSummaryHolder.getHigh(), marketSummaryHolder.getLow(), marketSummaryHolder.getVolume(), marketSummaryHolder.getBaseVolume(), new Ticker(marketSummaryHolder.getBid(), marketSummaryHolder.getAsk(), marketSummaryHolder.getLast()), marketSummaryHolder.getTimeStamp(), marketSummaryHolder.getOpenBuyOrders(), marketSummaryHolder.getOpenSellOrders(), marketSummaryHolder.getPrevDay(), marketSummaryHolder.getCreated()))
+                        .forEach(marketSummaryRepository::save);
+
+                MARKET_SUMMARY_HOLDER_TEMPORAL_MAP = marketSummaryHolderResponseListWrapper.getResult()
+                        .stream()
+                        .collect(Collectors.toMap(MarketSummaryHolder::getMarketName, MarketSummaryHolder::getTimeStamp));
+
+            }
+        });
+        logger.info("End Market Summary Sync");
+    }
+
+    public void syncOrderBook(){
+        Set<Market> markets = marketRepository.findAll();
+        logger.info("Start Order Book Sync");
+        markets.forEach(market -> {
+            ResponseWrapper<OrderBookHolder> orderBookHolderResponseWrapper = remoteService.getOrderBookRestCall(market.getMarketName());
+            if(Objects.nonNull(orderBookHolderResponseWrapper.getResult()) && orderBookHolderResponseWrapper.getSuccess()){
+                orderBookHolderResponseWrapper.getResult().getBuy().stream()
+                        .map(orderHolder -> orderHolder.)
+            }
+        });
+        logger.info("End Order Book Sync");
     }
 
     private boolean isResponseSuccess(ResponseListWrapper<?> responseListWrapper) {
