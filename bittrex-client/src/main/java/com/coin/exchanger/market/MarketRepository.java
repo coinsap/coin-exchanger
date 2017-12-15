@@ -17,5 +17,7 @@ public interface MarketRepository extends CrudRepository<Market, Long> {
 
     Market findByMarketName(String marketName);
 
+    Set<Market> findByIsActive(Boolean isActive);
+
     Set<Market> findAll();
 }
