@@ -1,5 +1,6 @@
 package com.coin.exchanger.sync;
 
+import com.coin.exchanger.guess.GuessService;
 import com.coin.exchanger.market.Market;
 import com.coin.exchanger.market.MarketRepository;
 import com.coin.exchanger.market.currency.Currency;
@@ -42,8 +43,10 @@ public class SynchronizeService {
     private final BuyRepository buyRepository;
     private final SellRepository sellRepository;
 
+    private final GuessService guessService;
+
     @Autowired
-    public SynchronizeService(MarketRepository marketRepository, MarketHistoryRepository marketHistoryRepository, CurrencyRepository currencyRepository, RemoteService remoteService, MarketSummaryRepository marketSummaryRepository, BuyRepository buyRepository, SellRepository sellRepository) {
+    public SynchronizeService(MarketRepository marketRepository, MarketHistoryRepository marketHistoryRepository, CurrencyRepository currencyRepository, RemoteService remoteService, MarketSummaryRepository marketSummaryRepository, BuyRepository buyRepository, SellRepository sellRepository, GuessService guessService) {
         this.marketRepository = marketRepository;
         this.marketHistoryRepository = marketHistoryRepository;
         this.currencyRepository = currencyRepository;
@@ -51,6 +54,7 @@ public class SynchronizeService {
         this.marketSummaryRepository = marketSummaryRepository;
         this.buyRepository = buyRepository;
         this.sellRepository = sellRepository;
+        this.guessService = guessService;
     }
 
 
@@ -58,15 +62,15 @@ public class SynchronizeService {
         ResponseListWrapper<CurrencyHolder> currencyHolderResponseListWrapper = remoteService.getCurrenciesRestCall();
         Set<String> currencies = currencyRepository.findAllCurrencyNames();
         if (isResponseSuccess(currencyHolderResponseListWrapper)) {
-            logger.info("Start Currency Sync");
-            logger.info("Currencies count on DB: {}", currencies.size());
-            logger.info("Currencies count on Request: {}", currencyHolderResponseListWrapper.getResult().size());
+            logger.debug("Start Currency Sync");
+            logger.debug("Currencies count on DB: {}", currencies.size());
+            logger.debug("Currencies count on Request: {}", currencyHolderResponseListWrapper.getResult().size());
             currencyHolderResponseListWrapper.getResult()
                     .stream()
                     .filter(currencyHolder -> !currencies.contains(currencyHolder.getCurrency()))
                     .map(currencyHolder -> new Currency(currencyHolder.getCurrency(), currencyHolder.getTxFee(), currencyHolder.getActive(), currencyHolder.getCoinType()))
                     .forEach(currencyRepository::save);
-            logger.info("End Currency Sync");
+            logger.debug("End Currency Sync");
         }
     }
 
@@ -74,22 +78,23 @@ public class SynchronizeService {
         ResponseListWrapper<MarketHolder> marketHolderResponseListWrapper = remoteService.getMarketsRestCall();
         Set<String> markets = marketRepository.findAllMarketNames();
         if (isResponseSuccess(marketHolderResponseListWrapper)) {
-            logger.info("Start Market Sync");
-            logger.info("Markets count on DB: {}", markets.size());
-            logger.info("Markets count on Request: {}", marketHolderResponseListWrapper.getResult().size());
+            logger.debug("Start Market Sync");
+            logger.debug("Markets count on DB: {}", markets.size());
+            logger.debug("Markets count on Request: {}", marketHolderResponseListWrapper.getResult().size());
             marketHolderResponseListWrapper.getResult()
                     .stream()
-                    .limit(5)
                     .filter(marketHolder -> !markets.contains(marketHolder.getMarketName()))
-                    .map(marketHolder -> new Market(currencyRepository.findByCurrency(marketHolder.getMarketCurrency()), currencyRepository.findByCurrency(marketHolder.getBaseCurrency()), marketHolder.getMarketName(), marketHolder.getMinTradeSize(), marketHolder.getActive()))
+                    //.filter(marketHolder -> marketHolder.getMarketName().substring(0, 3).equals("BTC"))
+                    .filter(marketHolder -> marketHolder.getMarketName().equals("BTC-XRP"))
+                    .map(marketHolder -> new Market(currencyRepository.findByCurrency(marketHolder.getMarketCurrency()), currencyRepository.findByCurrency(marketHolder.getBaseCurrency()), marketHolder.getMarketName(), marketHolder.getMinTradeSize(), false))
                     .forEach(marketRepository::save);
-            logger.info("End Market Sync");
+            logger.debug("End Market Sync");
         }
         MARKETS = marketRepository.findAll();
     }
 
     public void syncMarketHistory() {
-        logger.info("Start Market History Sync");
+        logger.debug("Start Market History Sync");
         MARKETS.forEach(market -> {
             ResponseListWrapper<MarketHistoryHolder> marketHistoryHolderResponseListWrapper = remoteService.getMarketHistoryRestCall(market.getMarketName());
             if (isResponseSuccess(marketHistoryHolderResponseListWrapper)) {
@@ -100,11 +105,11 @@ public class SynchronizeService {
                         .forEach(marketHistoryRepository::save);
             }
         });
-        logger.info("End Market History Sync");
+        logger.debug("End Market History Sync");
     }
 
     public void syncMarketSummary(){
-        logger.info("Start Market Summary Sync");
+        logger.debug("Start Market Summary Sync");
         MARKETS.forEach(market -> {
             ResponseListWrapper<MarketSummaryHolder> marketSummaryHolderResponseListWrapper = remoteService.getMarketSummaryRestCall(market.getMarketName());
             if(isResponseSuccess(marketSummaryHolderResponseListWrapper)){
@@ -115,12 +120,25 @@ public class SynchronizeService {
                         .forEach(marketSummaryRepository::save);
             }
         });
-        logger.info("End Market Summary Sync");
+        logger.debug("End Market Summary Sync");
+    }
+
+    public void filterMarket(){
+        MARKETS.forEach(market -> {
+            marketSummaryRepository.findAll()
+                    .stream()
+                    .sorted((marketSummary, t1) -> (marketSummary.getHigh() - marketSummary.getLow()) < (t1.getHigh() - t1.getLow()) ? 1 : -1)
+                    .limit(1)
+                    .map(marketSummary -> marketRepository.findOne(marketSummary.getMarket().getId()))
+                    .map(market1 -> {market1.setActive(true); return market1;})
+                    .forEach(marketRepository::save);
+        });
+        MARKETS = marketRepository.findByIsActive(true);
     }
 
     public void syncOrderBook(){
         Set<Market> markets = marketRepository.findAll();
-        logger.info("Start Buy Book Sync");
+        logger.debug("Start Buy Book Sync");
         markets.forEach(market -> {
             ResponseWrapper<OrderBookHolder> orderBookHolderResponseWrapper = remoteService.getOrderBookRestCall(market.getMarketName());
             if(Objects.nonNull(orderBookHolderResponseWrapper.getResult()) && orderBookHolderResponseWrapper.getSuccess()){
@@ -137,7 +155,11 @@ public class SynchronizeService {
                         .forEach(sellRepository::save);
             }
         });
-        logger.info("End Buy Book Sync");
+        logger.debug("End Buy Book Sync");
+    }
+
+    public void syncGuess(){
+        MARKETS.forEach(guessService::isProper);
     }
 
     private boolean isResponseSuccess(ResponseListWrapper<?> responseListWrapper) {
