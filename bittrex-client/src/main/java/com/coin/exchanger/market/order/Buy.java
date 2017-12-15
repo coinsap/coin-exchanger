@@ -11,7 +11,7 @@ import javax.persistence.*;
  * @author Semih Beceren
  */
 @Entity
-@Table(indexes = {@Index(name = "buy_hash_Idx", unique = true, columnList = "hash"), @Index(name = "buy_created_date_Idx", unique = true, columnList = "created_date")})
+@Table(indexes = {@Index(name = "buy_hash_Idx", unique = true, columnList = "hash"), @Index(name = "buy_created_date_Idx", columnList = "created_date")})
 @EntityListeners(AuditingEntityListener.class)
 public class Buy {
 
