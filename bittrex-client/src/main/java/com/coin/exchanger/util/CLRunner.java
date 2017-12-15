@@ -27,5 +27,7 @@ public class CLRunner implements CommandLineRunner {
     public void run(String... strings) throws Exception {
         executorService.execute(synchronizeService::syncCurrencies);
         executorService.execute(synchronizeService::syncMarkets);
+        executorService.execute(synchronizeService::syncMarketSummary);
+        executorService.execute(synchronizeService::filterMarket);
     }
 }
